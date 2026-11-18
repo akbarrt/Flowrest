@@ -5,6 +5,8 @@ const STORAGE_KEY = 'flowrest.sessions'
 const moodValues = new Set<string>(MOODS)
 const flowerValues = new Set<string>(FLOWER_TYPES)
 
+export type StorageProvider = () => globalThis.Storage | null
+
 function getBrowserStorage(): globalThis.Storage | null {
   try {
     return typeof window === 'undefined' ? null : window.localStorage
@@ -42,32 +44,37 @@ function readSessions(storage: globalThis.Storage): Session[] {
   }
 }
 
-export const localStorageSessionStorage: SessionStorage = {
-  async getSessions() {
-    const storage = getBrowserStorage()
-    return storage ? readSessions(storage) : []
-  },
+export function createLocalStorageSessionStorage(getStorage: StorageProvider): SessionStorage {
+  return {
+    async getSessions() {
+      const storage = getStorage()
+      return storage ? readSessions(storage) : []
+    },
 
-  async addSession(session) {
-    const storage = getBrowserStorage()
-    if (!storage) return
+    async addSession(session) {
+      const storage = getStorage()
+      if (!storage) return
 
-    try {
-      const sessions = readSessions(storage)
-      storage.setItem(STORAGE_KEY, JSON.stringify([...sessions, session]))
-    } catch {
-      // Storage may be unavailable (private mode/quota); ignore for MVP.
-    }
-  },
+      try {
+        const sessions = readSessions(storage)
+        storage.setItem(STORAGE_KEY, JSON.stringify([...sessions, session]))
+      } catch {
+        // Storage may be unavailable (private mode/quota); ignore for MVP.
+      }
+    },
 
-  async clearSessions() {
-    const storage = getBrowserStorage()
-    if (!storage) return
+    async clearSessions() {
+      const storage = getStorage()
+      if (!storage) return
 
-    try {
-      storage.removeItem(STORAGE_KEY)
-    } catch {
-      // Storage may be unavailable; ignore for MVP.
-    }
-  },
+      try {
+        storage.removeItem(STORAGE_KEY)
+      } catch {
+        // Storage may be unavailable; ignore for MVP.
+      }
+    },
+  }
 }
+
+export const localStorageSessionStorage: SessionStorage =
+  createLocalStorageSessionStorage(getBrowserStorage)
