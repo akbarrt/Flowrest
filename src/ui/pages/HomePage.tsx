@@ -1,6 +1,49 @@
+import { useCallback, useRef, useState } from 'react'
+import { createSession } from '../../core/session'
+import { FOCUS_DURATION_MS } from '../../core/timer'
+import type { Mood } from '../../core/types'
+import { useSessions } from '../../hooks/useSessions'
+import { MoodForm } from '../components/MoodForm'
 import { Timer } from '../components/Timer'
 
+const SESSION_MINUTES = FOCUS_DURATION_MS / (60 * 1000)
+
 export function HomePage() {
+  const { addSession } = useSessions()
+  const [isMoodFormOpen, setIsMoodFormOpen] = useState(false)
+  const isSavingRef = useRef(false)
+
+  const handleSessionComplete = useCallback(() => {
+    setIsMoodFormOpen(true)
+  }, [])
+
+  const saveSession = useCallback(
+    async (mood: Mood) => {
+      if (isSavingRef.current) {
+        return
+      }
+
+      isSavingRef.current = true
+
+      try {
+        await addSession(
+          createSession({
+            id: crypto.randomUUID(),
+            date: new Date().toISOString(),
+            durationMinutes: SESSION_MINUTES,
+            mood,
+          }),
+        )
+        setIsMoodFormOpen(false)
+      } finally {
+        isSavingRef.current = false
+      }
+    },
+    [addSession],
+  )
+
+  const handleSkip = useCallback(() => saveSession('neutral'), [saveSession])
+
   return (
     <section
       aria-labelledby="timer-title"
@@ -17,7 +60,10 @@ export function HomePage() {
           Sesi fokus 25 menit, lalu jeda 5 menit.
         </p>
       </div>
-      <Timer />
+      <div className={isMoodFormOpen ? 'hidden' : 'w-full'}>
+        <Timer onSessionComplete={handleSessionComplete} />
+      </div>
+      {isMoodFormOpen ? <MoodForm onSave={saveSession} onSkip={handleSkip} /> : null}
     </section>
   )
 }
