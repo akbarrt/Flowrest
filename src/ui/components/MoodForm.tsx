@@ -2,14 +2,7 @@ import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { MOODS } from '../../core/types'
 import type { Mood } from '../../core/types'
-
-const MOOD_LABELS: Record<Mood, string> = {
-  very_bad: 'Sangat tidak baik',
-  bad: 'Kurang baik',
-  neutral: 'Biasa saja',
-  good: 'Baik',
-  great: 'Sangat baik',
-}
+import { MOOD_LABELS } from '../labels'
 
 type MoodFormProps = {
   onSave: (mood: Mood) => Promise<void>

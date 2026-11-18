@@ -46,6 +46,7 @@ export function HomePage() {
 
   return (
     <section
+      id="timer"
       aria-labelledby="timer-title"
       className="mx-auto flex w-full max-w-md flex-col items-center gap-8 py-4 text-center sm:py-10"
     >
