@@ -8,7 +8,7 @@
 
 ## 🚧 Project Status: Coming Soon...
 
-We're currently planting the seeds for Flowres 🌼  
+We're currently planting the seeds for Flowrest 🌼  
 The first sprout is on its way — stay tuned for progress updates, sneak peeks, and dev logs.
 Lagi disusun pelan-pelan. Repo ini baru awal, belum banyak file.
 
@@ -25,7 +25,7 @@ Lagi disusun pelan-pelan. Repo ini baru awal, belum banyak file.
 
 ## 🌟 What's the Idea?
 
-Flowres is more than just a Pomodoro timer. It's a mindful study companion that:
+Flowrest is more than just a Pomodoro timer. It's a mindful study companion that:
 
 - Uses **Pomodoro technique** (25/5 focus sessions)
 - Tracks your **mood after each session**
