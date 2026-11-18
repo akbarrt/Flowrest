@@ -1,5 +1,41 @@
 @import "tailwindcss";
 
-:root {
-  font-family: system-ui, sans-serif;
+@theme {
+  --color-paper: #f6f2ea;
+  --color-surface: #fbf8f2;
+  --color-ink: #23281f;
+  --color-muted: #5a5f55;
+  --color-line: #ddd6c7;
+  --color-moss: #3f5d3a;
+  --color-sage: #7a8b6f;
+  --color-terracotta: #c97b5a;
+  --color-success: #6b8e4e;
+  --color-warning: #c99a3f;
+  --color-danger: #a84a3f;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :where(a, button, summary, select, label[for], [role="button"]) {
+    cursor: pointer;
+  }
+
+  :where(button, a, summary, select, input, textarea):focus-visible {
+    outline: 2px solid var(--color-moss);
+    outline-offset: 2px;
+  }
 }

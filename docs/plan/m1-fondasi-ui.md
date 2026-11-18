@@ -1,6 +1,6 @@
 # m1 - Fondasi UI
 
-Status: todo
+Status: done
 
 Tujuan: Menyiapkan shell aplikasi dan layout dasar berbahasa Indonesia tanpa dependency baru.
 
