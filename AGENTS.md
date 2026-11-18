@@ -3,43 +3,50 @@
 ## Source of truth
 
 - Single npm package (`flowrest`, private, ESM); no workspaces.
-- `docs/PRD.md` defines the current MVP scope. `docs/FEATURES.md` holds behavior and task slices. `package.json` and `src/` are the executable truth.
-- `docs/API.md`, `docs/DATABASE.md`, and `docs/DECISIONS.md` are a legacy blueprint for a different stack (Next.js, IndexedDB, Supabase, Playwright). Do not implement that stack or its features. Use `docs/DESIGN.md` only for visual direction.
+- If sources conflict, priority is: `src/` and `package.json` > `docs/plan/` > `docs/PRD.md` > `docs/FEATURES.md`.
+- `docs/PRD.md` defines the MVP scope. `docs/FEATURES.md` holds behavior details. `docs/DESIGN.md` is for visual direction only.
+- Never read or follow `docs/archive/`. It is an old blueprint for a different stack (Next.js, IndexedDB, Supabase, Playwright). Do not implement that stack.
 - Deferred, do not implement unless asked: backend/auth, cloud sync, reminders, weekly stats, PWA, Framer Motion.
 - UI copy is Indonesian (`index.html` uses `lang="id"`).
 
 ## Commands
 
-- `npm run dev` — Vite dev server.
-- `npm run build` — `tsc -b && vite build`; this is the only typecheck path.
-- `npm run lint` — oxlint, not ESLint; config is `.oxlintrc.json`.
-- `npm test` — Vitest run; focus one file with `npm test -- src/core/__tests__/timer.test.ts`.
-- No `typecheck`, `check`, or `format` script exists. Verify with `npm run lint && npm run build && npm test`.
+- `npm run dev`: Vite dev server.
+- `npm run build`: `tsc -b && vite build`; this is the only typecheck path.
+- `npm run lint`: oxlint, not ESLint; config is `.oxlintrc.json`.
+- `npm test`: Vitest run; focus one file with `npm test -- src/core/__tests__/timer.test.ts`.
+- No `typecheck`, `check`, or `format` script exists.
+- Before saying a task is done, run `npm run lint && npm run build && npm test` and report the results.
 
 ## Architecture
 
-- `src/core/` is pure TS: no React, browser APIs, or imports from `ui/`, `hooks/`, or `storage/`.
+- `src/core/` is pure TS: no React, no browser APIs, no imports from `ui/`, `hooks/`, or `storage/`.
 - `src/storage/` must not import from `ui/` or `hooks/`. All persistence goes through the async `SessionStorage` interface in `src/storage/storage.ts`; the localStorage implementation uses key `flowrest.sessions`.
-- React code belongs in `src/hooks/` and `src/ui/`; use named exports only.
-- Most feature files (`core/{timer,garden,stats}.ts`, hooks, UI components/pages) are empty placeholders — only `types.ts` and `storage/*` are implemented. Do not assume logic exists.
+- React code belongs in `src/hooks/` and `src/ui/`. Use named exports only and functional components.
+- Check a file's actual contents before assuming logic exists; some files may still be empty placeholders.
 
 ## Toolchain gotchas
 
 - `tsconfig.app.json` sets `verbatimModuleSyntax` and `erasableSyntaxOnly`: use `import type` for types; no enums or parameter properties.
-- Tailwind v4 is wired via `@tailwindcss/vite` and `@import "tailwindcss"` in `src/index.css`; there is no Tailwind config file.
-- Vitest has no separate config and no jsdom/testing-library installed; tests are pure TS by default.
+- Tailwind v4 is wired via `@tailwindcss/vite` and `@import "tailwindcss"` in `src/index.css`; there is no Tailwind config file. Do not create one.
+- Vitest has no separate config and no jsdom/testing-library; tests are pure TS by default. Do not add a test environment without asking.
 
 ## Planning workflow
 
-- `docs/plan/` holds the active todo: one `m<n>-<nama-pekerjaan>.md` per task, numbered `m1`, `m2`, and so on. Names are lowercase Indonesian words joined by hyphens.
-- For a multi-step build request, create the plan files before editing code. Work on exactly one task, the lowest number whose status is not `done`. Report when it is done and wait before starting the next.
-- Each plan file has `Status: todo|doing|done`, `Tujuan`, `Langkah`, `Selesai ketika`, and `Verifikasi`. Update the status in the file. Do not batch tasks or renumber existing files.
-- `docs/plan/` is the active task list. `docs/FEATURES.md` holds behavior and task slices. Base work on `docs/PRD.md` and the current `src/`.
+- `docs/plan/` holds the active task list: one `m<n>-<nama-pekerjaan>.md` per task, numbered `m1`, `m2`, and so on. Names are lowercase Indonesian words joined by hyphens.
+- Work on exactly one task: the lowest number whose status is not `done`. When finished, report and wait before starting the next.
+- Each plan file has `Status: todo|doing|done`, `Tujuan`, `Langkah`, `Selesai ketika`, and `Verifikasi`. Update the status in the file as you go.
+- Do not batch tasks, skip ahead, or renumber existing plan files.
+- For a multi-step build request, create the plan files before editing code.
 
 ## Working rules
 
 - Do not add dependencies without asking first.
 - Do not implement features outside `docs/PRD.md` or the current task.
+- Make small, focused changes. Show the plan first for any change touching more than a few files.
+- Use explicit TypeScript types; avoid `any`.
+- Do not run git commands (commit, push, reset, checkout). The user commits manually.
+- Never print, log, or write secrets or API keys into files.
 
 <!-- antislop:start -->
 ## antislop
