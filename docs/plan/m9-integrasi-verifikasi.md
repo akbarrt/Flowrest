@@ -29,8 +29,10 @@ Verifikasi browser dengan Chrome headless pada viewport 375x812:
 - Timer: judul dokumen `Flowrest`, `lang="id"`, timer awal `25:00`, nav menandai Timer, tidak ada overflow horizontal.
 - Kontrol: Mulai berjalan (`24:59`), Jeda menampilkan "Dijeda" dan tombol "Lanjut", Reset kembali `25:00`. Space mulai/jeda dan `R` reset juga bekerja.
 - Penyelesaian fokus disimulasikan dengan virtual time 25 menit. Form mood muncul dengan 5 radio, "Simpan mood", dan "Lewati". Memilih "Sangat baik" menyimpan satu sesi `mood: great`, `flower: rose`.
-- Kebun: satu baris Mawar, nav menandai Kebun, tanpa overflow. Klik baris membuka detail Tanggal, Mood "Sangat baik", dan Jenis bunga "Mawar".
+- Siklus kedua diselesaikan lalu "Lewati" ditekan. Sesi kedua tersimpan dengan `mood: neutral`, `flower: tulip`, dan total tetap dua sesi dengan ID unik (tidak ada entri ganda).
+- Kebun: satu baris Mawar, lalu dua baris Mawar dan Tulip setelah siklus kedua. Nav menandai Kebun, tanpa overflow. Klik baris membuka detail Tanggal, Mood "Sangat baik", dan Jenis bunga "Mawar".
+- Empty state setelah storage dikosongkan menampilkan "Kebunmu masih kosong." dan CTA "Mulai fokus". Klik CTA membuka halaman Timer dengan hash `#timer`.
 - Refresh di `#kebun` mempertahankan halaman dan sesi. Tidak ada error konsol.
-- Tangkapan layar timer, form mood, kebun, dan detail kebun diperiksa pada 375px.
+- Tangkapan layar timer, form mood, kebun satu bunga, detail kebun, kebun dua bunga, dan empty state diperiksa pada 375px.
 
 Verifikasi perintah: `npm run lint`, `npm run build`, dan `npm test` lolos (4 file, 27 test).
