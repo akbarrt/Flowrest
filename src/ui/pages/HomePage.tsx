@@ -3,16 +3,20 @@ import { createSession } from '../../core/session'
 import { timerDurationsFromSettings } from '../../core/settings'
 import { countSessionsToday } from '../../core/stats'
 import type { Mood } from '../../core/types'
+import { useNotifications } from '../../hooks/useNotifications'
 import { useSessions } from '../../hooks/useSessions'
 import { useSettings } from '../../hooks/useSettings'
 import { useTimer } from '../../hooks/useTimer'
 import { DurationSettings } from '../components/DurationSettings'
 import { MoodForm } from '../components/MoodForm'
+import { NotificationSettings } from '../components/NotificationSettings'
 import { Timer } from '../components/Timer'
 
 export function HomePage({ isActive }: { isActive: boolean }) {
   const { sessions, addSession } = useSessions()
   const { settings, isLoading, error, saveSettings } = useSettings()
+  const { permission, requestPermission, notifyFocusComplete, notifyRestComplete } =
+    useNotifications()
   const durations = useMemo(() => timerDurationsFromSettings(settings), [settings])
   const todayCount = countSessionsToday(sessions)
   const [isMoodFormOpen, setIsMoodFormOpen] = useState(false)
@@ -20,9 +24,18 @@ export function HomePage({ isActive }: { isActive: boolean }) {
 
   const handleSessionComplete = useCallback(() => {
     setIsMoodFormOpen(true)
-  }, [])
+    notifyFocusComplete(settings.breakMinutes)
+  }, [notifyFocusComplete, settings.breakMinutes])
 
-  const timer = useTimer({ durations, onSessionComplete: handleSessionComplete })
+  const handleRestComplete = useCallback(() => {
+    notifyRestComplete()
+  }, [notifyRestComplete])
+
+  const timer = useTimer({
+    durations,
+    onSessionComplete: handleSessionComplete,
+    onRestComplete: handleRestComplete,
+  })
 
   const saveSession = useCallback(
     async (mood: Mood) => {
@@ -85,6 +98,7 @@ export function HomePage({ isActive }: { isActive: boolean }) {
         error={error}
         onSave={saveSettings}
       />
+      <NotificationSettings permission={permission} onRequest={requestPermission} />
     </section>
   )
 }

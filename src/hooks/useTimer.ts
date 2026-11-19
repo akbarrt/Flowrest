@@ -18,6 +18,8 @@ const TICK_INTERVAL_MS = 250
 export interface UseTimerOptions {
   /** Dipanggil tepat sekali saat fase focus selesai. */
   onSessionComplete?: () => void
+  /** Dipanggil tepat sekali saat fase istirahat selesai. */
+  onRestComplete?: () => void
   durations?: TimerDurations
 }
 
@@ -54,9 +56,10 @@ function toView(state: TimerState, now: number): TimerView {
 }
 
 export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
-  const { onSessionComplete, durations = DEFAULT_DURATIONS } = options
+  const { onSessionComplete, onRestComplete, durations = DEFAULT_DURATIONS } = options
   const stateRef = useRef<TimerState>(createTimerState('focus', durations))
   const onCompleteRef = useRef(onSessionComplete)
+  const onRestCompleteRef = useRef(onRestComplete)
   const [view, setView] = useState<TimerView>(() => ({
     phase: 'focus',
     status: 'idle',
@@ -70,6 +73,10 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
   useEffect(() => {
     onCompleteRef.current = onSessionComplete
   }, [onSessionComplete])
+
+  useEffect(() => {
+    onRestCompleteRef.current = onRestComplete
+  }, [onRestComplete])
 
   useEffect(() => {
     const current = stateRef.current
@@ -95,6 +102,10 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
 
       if (result.phaseCompleted === 'focus') {
         onCompleteRef.current?.()
+      }
+
+      if (result.phaseCompleted === 'break') {
+        onRestCompleteRef.current?.()
       }
     }, TICK_INTERVAL_MS)
 
