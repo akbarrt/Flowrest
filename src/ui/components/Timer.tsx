@@ -83,7 +83,7 @@ export function Timer({ timer, active = true }: TimerProps) {
   const dashOffset = RING_CIRCUMFERENCE * (1 - remainingFraction)
   const ringColor = phase === 'focus' ? 'var(--color-moss)' : 'var(--color-sage)'
 
-  const phaseLabel = phase === 'focus' ? 'Sesi fokus' : 'Jeda'
+  const phaseLabel = phase === 'focus' ? 'Sesi fokus' : 'Istirahat'
   const primaryLabel = status === 'running' ? 'Jeda' : status === 'paused' ? 'Lanjut' : 'Mulai'
   const statusLabel =
     status === 'running'
@@ -91,7 +91,7 @@ export function Timer({ timer, active = true }: TimerProps) {
       : status === 'paused'
         ? 'Dijeda'
         : phase === 'break'
-          ? 'Siap untuk jeda'
+          ? 'Siap untuk istirahat'
           : 'Siap dimulai'
   const resetDisabled =
     phase === 'focus' && status === 'idle' && remainingMs === durations.focusDurationMs
@@ -166,7 +166,7 @@ export function Timer({ timer, active = true }: TimerProps) {
             onClick={skipBreak}
             className="min-h-11 rounded-md border border-line bg-surface px-4 text-sm font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 motion-reduce:transition-none"
           >
-            Lewati jeda
+            Lewati istirahat
           </button>
         ) : null}
       </div>

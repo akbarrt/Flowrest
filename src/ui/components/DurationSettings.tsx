@@ -133,7 +133,7 @@ export function DurationSettings({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="break-minutes" className="text-sm font-medium text-ink">
-            Jeda (menit)
+            Istirahat (menit)
           </label>
           <input
             id="break-minutes"

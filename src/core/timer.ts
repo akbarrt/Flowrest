@@ -19,7 +19,7 @@ export interface TimerState extends TimerDurations {
   status: TimerStatus
   /** Sisa waktu saat `segmentStartedAt` dicatat, atau sisa waktu saat ini ketika tidak berjalan. */
   remainingMs: number
-  /** Epoch ms saat segmen berjalan dimulai; null ketika idle atau jeda. */
+  /** Epoch ms saat segmen berjalan dimulai; null ketika idle atau dijeda. */
   segmentStartedAt: number | null
 }
 
@@ -108,17 +108,18 @@ export function withDurations(state: TimerState, durations: TimerDurations): Tim
 
 /**
  * Mengakhiri fokus yang sedang berjalan atau dijeda tanpa menandai sesi selesai.
- * Tidak ada `phaseCompleted`, jadi tidak memicu form mood atau penyimpanan sesi.
+ * Istirahat langsung berjalan. Tidak ada `phaseCompleted`, jadi tidak memicu
+ * form mood, notifikasi, atau penyimpanan sesi.
  */
-export function finishEarly(state: TimerState): TimerState {
+export function finishEarly(state: TimerState, now: number): TimerState {
   if (state.phase !== 'focus' || state.status === 'idle') {
     return state
   }
 
-  return createPhaseState('break', state)
+  return startTimer(createPhaseState('break', state), now)
 }
 
-/** Meninggalkan jeda dan kembali ke fokus idle dengan mulai manual. */
+/** Meninggalkan istirahat dan kembali ke fokus idle dengan mulai manual. */
 export function skipBreak(state: TimerState): TimerState {
   if (state.phase !== 'break') {
     return state
@@ -148,7 +149,7 @@ export function tickTimer(state: TimerState, now: number): TimerTick {
   const nextPhase: TimerPhase = state.phase === 'focus' ? 'break' : 'focus'
 
   return {
-    state: createPhaseState(nextPhase, state),
+    state: startTimer(createPhaseState(nextPhase, state), now),
     phaseCompleted: state.phase,
   }
 }

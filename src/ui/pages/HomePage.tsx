@@ -65,7 +65,7 @@ export function HomePage({ isActive }: { isActive: boolean }) {
           Timer fokus
         </h1>
         <p className="text-base leading-relaxed text-muted">
-          Sesi fokus {settings.focusMinutes} menit, lalu jeda {settings.breakMinutes} menit.
+          Sesi fokus {settings.focusMinutes} menit, lalu istirahat {settings.breakMinutes} menit.
         </p>
         <p className="text-sm text-muted">
           {todayCount === 0

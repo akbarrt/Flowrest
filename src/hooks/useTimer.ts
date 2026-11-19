@@ -126,13 +126,14 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
   }, [])
 
   const finishEarly = useCallback(() => {
-    const next = finishEarlyTimer(stateRef.current)
+    const now = Date.now()
+    const next = finishEarlyTimer(stateRef.current, now)
     if (next === stateRef.current) {
       return
     }
 
     stateRef.current = next
-    setView(toView(next, Date.now()))
+    setView(toView(next, now))
   }, [])
 
   const skipBreak = useCallback(() => {

@@ -28,3 +28,5 @@ Catatan: Keputusan pengguna: selesai lebih awal tanpa sesi, lewati jeda kembali 
 - Verifikasi browser 375px dengan 11 pemeriksaan, semuanya lolos: tidak ada tombol kontekstual saat fokus idle, tombol selesai muncul saat berjalan dan dijeda, selesai lebih awal masuk ke jeda 3 menit kustom tanpa sesi atau form mood, tombol lewati menggantikan tombol selesai, lewati jeda kembali ke fokus 15 menit kustom dan mulai manual tetap berfungsi, tanpa overflow horizontal dan console error.
 - Regresi: verifikasi m10 (10 pemeriksaan) dan m11 (13 pemeriksaan) dijalankan ulang setelah perubahan ini, semuanya lolos.
 - `npm run lint`, `npm run build`, `npm test`: lolos.
+
+Catatan kemudian: perilaku istirahat idle dan istilah "jeda" pada task ini digantikan oleh m14. `finishEarly` sekarang menjalankan istirahat otomatis dan seluruh label fase memakai "Istirahat".

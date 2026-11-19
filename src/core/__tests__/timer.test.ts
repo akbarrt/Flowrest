@@ -117,27 +117,27 @@ describe('tickTimer', () => {
     expect(result.state).toBe(running)
   })
 
-  test('moves to an idle break when the focus phase completes', () => {
+  test('starts the break immediately when the focus phase completes', () => {
     const running = startTimer(createTimerState(), 0)
     const result = tickTimer(running, FOCUS_DURATION_MS)
 
     expect(result.phaseCompleted).toBe('focus')
     expect(result.state.phase).toBe('break')
-    expect(result.state.status).toBe('idle')
+    expect(result.state.status).toBe('running')
     expect(result.state.remainingMs).toBe(BREAK_DURATION_MS)
-    expect(result.state.segmentStartedAt).toBeNull()
+    expect(result.state.segmentStartedAt).toBe(FOCUS_DURATION_MS)
   })
 
-  test('returns to an idle focus timer when the break completes', () => {
+  test('starts focus immediately when the break completes', () => {
     const running = startTimer(createTimerState(), 0)
     const onBreak = tickTimer(running, FOCUS_DURATION_MS).state
-    const breakRunning = startTimer(onBreak, 1000)
-    const result = tickTimer(breakRunning, 1000 + BREAK_DURATION_MS)
+    const result = tickTimer(onBreak, FOCUS_DURATION_MS + BREAK_DURATION_MS)
 
     expect(result.phaseCompleted).toBe('break')
     expect(result.state.phase).toBe('focus')
-    expect(result.state.status).toBe('idle')
+    expect(result.state.status).toBe('running')
     expect(result.state.remainingMs).toBe(FOCUS_DURATION_MS)
+    expect(result.state.segmentStartedAt).toBe(FOCUS_DURATION_MS + BREAK_DURATION_MS)
   })
 
   test('does nothing when the timer is not running', () => {
@@ -172,10 +172,10 @@ describe('custom durations', () => {
   test('tickTimer uses the stored focus duration when break completes', () => {
     const running = startTimer(createTimerState('focus', durations), 0)
     const onBreak = tickTimer(running, 10 * MINUTE).state
-    const breakRunning = startTimer(onBreak, 1000)
-    const result = tickTimer(breakRunning, 1000 + 2 * MINUTE)
+    const result = tickTimer(onBreak, 12 * MINUTE)
 
     expect(result.phaseCompleted).toBe('break')
+    expect(result.state.status).toBe('running')
     expect(result.state.remainingMs).toBe(10 * MINUTE)
   })
 
@@ -210,24 +210,25 @@ describe('custom durations', () => {
 })
 
 describe('finishEarly', () => {
-  test('ends a running focus into an idle break without completing a phase', () => {
+  test('starts the break immediately without completing a phase', () => {
     const running = startTimer(createTimerState('focus'), 0)
-    const next = finishEarly(running)
+    const next = finishEarly(running, 30 * MINUTE)
 
     expect(next.phase).toBe('break')
-    expect(next.status).toBe('idle')
+    expect(next.status).toBe('running')
     expect(next.remainingMs).toBe(BREAK_DURATION_MS)
-    expect(next.segmentStartedAt).toBeNull()
+    expect(next.segmentStartedAt).toBe(30 * MINUTE)
   })
 
   test('also works from a paused focus', () => {
     const running = startTimer(createTimerState('focus'), 0)
     const paused = pauseTimer(running, MINUTE)
-    const next = finishEarly(paused)
+    const next = finishEarly(paused, 20 * MINUTE)
 
     expect(next.phase).toBe('break')
-    expect(next.status).toBe('idle')
+    expect(next.status).toBe('running')
     expect(next.remainingMs).toBe(BREAK_DURATION_MS)
+    expect(next.segmentStartedAt).toBe(20 * MINUTE)
   })
 
   test('does nothing for idle focus or any break state', () => {
@@ -235,9 +236,9 @@ describe('finishEarly', () => {
     const idleBreak = createTimerState('break')
     const runningBreak = startTimer(idleBreak, 0)
 
-    expect(finishEarly(idleFocus)).toBe(idleFocus)
-    expect(finishEarly(idleBreak)).toBe(idleBreak)
-    expect(finishEarly(runningBreak)).toBe(runningBreak)
+    expect(finishEarly(idleFocus, 1000)).toBe(idleFocus)
+    expect(finishEarly(idleBreak, 1000)).toBe(idleBreak)
+    expect(finishEarly(runningBreak, 1000)).toBe(runningBreak)
   })
 })
 
