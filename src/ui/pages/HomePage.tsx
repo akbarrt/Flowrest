@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { createSession } from '../../core/session'
 import { timerDurationsFromSettings } from '../../core/settings'
+import { countSessionsToday } from '../../core/stats'
 import type { Mood } from '../../core/types'
 import { useSessions } from '../../hooks/useSessions'
 import { useSettings } from '../../hooks/useSettings'
@@ -10,9 +11,10 @@ import { MoodForm } from '../components/MoodForm'
 import { Timer } from '../components/Timer'
 
 export function HomePage({ isActive }: { isActive: boolean }) {
-  const { addSession } = useSessions()
+  const { sessions, addSession } = useSessions()
   const { settings, isLoading, error, saveSettings } = useSettings()
   const durations = useMemo(() => timerDurationsFromSettings(settings), [settings])
+  const todayCount = countSessionsToday(sessions)
   const [isMoodFormOpen, setIsMoodFormOpen] = useState(false)
   const isSavingRef = useRef(false)
 
@@ -64,6 +66,11 @@ export function HomePage({ isActive }: { isActive: boolean }) {
         </h1>
         <p className="text-base leading-relaxed text-muted">
           Sesi fokus {settings.focusMinutes} menit, lalu jeda {settings.breakMinutes} menit.
+        </p>
+        <p className="text-sm text-muted">
+          {todayCount === 0
+            ? 'Belum ada sesi selesai hari ini.'
+            : `${todayCount} sesi selesai hari ini.`}
         </p>
       </div>
       <div className={isMoodFormOpen ? 'hidden' : 'w-full'}>
