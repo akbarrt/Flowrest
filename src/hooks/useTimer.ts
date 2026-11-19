@@ -1,19 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  DEFAULT_DURATIONS,
   createTimerState,
   pauseTimer,
   remainingTime,
   resetTimer,
   startTimer,
   tickTimer,
+  withDurations,
 } from '../core/timer'
-import type { TimerPhase, TimerState, TimerStatus } from '../core/timer'
+import type { TimerDurations, TimerPhase, TimerState, TimerStatus } from '../core/timer'
 
 const TICK_INTERVAL_MS = 250
 
 export interface UseTimerOptions {
   /** Dipanggil tepat sekali saat fase focus selesai. */
   onSessionComplete?: () => void
+  durations?: TimerDurations
 }
 
 export interface UseTimerResult {
@@ -21,6 +24,7 @@ export interface UseTimerResult {
   status: TimerStatus
   /** Sisa waktu dalam milidetik, dihitung dari timestamp. */
   remainingMs: number
+  durations: TimerDurations
   start: () => void
   pause: () => void
   reset: () => void
@@ -30,6 +34,7 @@ interface TimerView {
   phase: TimerPhase
   status: TimerStatus
   remainingMs: number
+  durations: TimerDurations
 }
 
 function toView(state: TimerState, now: number): TimerView {
@@ -37,18 +42,40 @@ function toView(state: TimerState, now: number): TimerView {
     phase: state.phase,
     status: state.status,
     remainingMs: remainingTime(state, now),
+    durations: {
+      focusDurationMs: state.focusDurationMs,
+      breakDurationMs: state.breakDurationMs,
+    },
   }
 }
 
 export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
-  const { onSessionComplete } = options
-  const stateRef = useRef<TimerState>(createTimerState())
+  const { onSessionComplete, durations = DEFAULT_DURATIONS } = options
+  const stateRef = useRef<TimerState>(createTimerState('focus', durations))
   const onCompleteRef = useRef(onSessionComplete)
-  const [view, setView] = useState<TimerView>(() => toView(createTimerState(), Date.now()))
+  const [view, setView] = useState<TimerView>(() => ({
+    phase: 'focus',
+    status: 'idle',
+    remainingMs: durations.focusDurationMs,
+    durations: {
+      focusDurationMs: durations.focusDurationMs,
+      breakDurationMs: durations.breakDurationMs,
+    },
+  }))
 
   useEffect(() => {
     onCompleteRef.current = onSessionComplete
   }, [onSessionComplete])
+
+  useEffect(() => {
+    const current = stateRef.current
+    const next = withDurations(current, durations)
+
+    if (next !== current) {
+      stateRef.current = next
+      setView(toView(next, Date.now()))
+    }
+  }, [durations])
 
   useEffect(() => {
     if (view.status !== 'running') {
@@ -88,7 +115,7 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
 
   const reset = useCallback(() => {
     const now = Date.now()
-    const next = resetTimer()
+    const next = resetTimer('focus', stateRef.current)
 
     stateRef.current = next
     setView(toView(next, now))
@@ -98,6 +125,7 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
     phase: view.phase,
     status: view.status,
     remainingMs: view.remainingMs,
+    durations: view.durations,
     start,
     pause,
     reset,

@@ -1,8 +1,11 @@
 import { describe, expect, test } from 'vitest'
+import { DEFAULT_TIMER_SETTINGS } from '../../core/settings'
 import type { Session } from '../../core/types'
 import { createLocalStorageSessionStorage } from '../localStorage'
+import { createLocalStorageSettingsStorage } from '../settings'
 
 const STORAGE_KEY = 'flowrest.sessions'
+const SETTINGS_KEY = 'flowrest.settings'
 
 class MemoryStorage implements Storage {
   private readonly store = new Map<string, string>()
@@ -108,5 +111,48 @@ describe('localStorageSessionStorage', () => {
     await expect(sessionStorage.getSessions()).resolves.toEqual([])
     await expect(sessionStorage.addSession(makeSession())).resolves.toBeUndefined()
     await expect(sessionStorage.clearSessions()).resolves.toBeUndefined()
+  })
+})
+
+describe('localStorageSettingsStorage', () => {
+  test('saveSettings stores settings under the flowrest.settings key', async () => {
+    const storage = new MemoryStorage()
+    const settingsStorage = createLocalStorageSettingsStorage(() => storage)
+    const settings = { focusMinutes: 50, breakMinutes: 10 }
+
+    await settingsStorage.saveSettings(settings)
+
+    expect(storage.getItem(SETTINGS_KEY)).toBe(JSON.stringify(settings))
+    await expect(settingsStorage.getSettings()).resolves.toEqual(settings)
+  })
+
+  test('getSettings returns defaults when nothing is stored', async () => {
+    const storage = new MemoryStorage()
+    const settingsStorage = createLocalStorageSettingsStorage(() => storage)
+
+    await expect(settingsStorage.getSettings()).resolves.toEqual(DEFAULT_TIMER_SETTINGS)
+  })
+
+  test('getSettings sanitizes stored values', async () => {
+    const storage = new MemoryStorage()
+    const settingsStorage = createLocalStorageSettingsStorage(() => storage)
+
+    storage.setItem(SETTINGS_KEY, '{not-json')
+    await expect(settingsStorage.getSettings()).resolves.toEqual(DEFAULT_TIMER_SETTINGS)
+
+    storage.setItem(SETTINGS_KEY, JSON.stringify({ focusMinutes: 200, breakMinutes: 3 }))
+    await expect(settingsStorage.getSettings()).resolves.toEqual({
+      focusMinutes: DEFAULT_TIMER_SETTINGS.focusMinutes,
+      breakMinutes: 3,
+    })
+  })
+
+  test('returns defaults when browser storage is unavailable', async () => {
+    const settingsStorage = createLocalStorageSettingsStorage(() => null)
+
+    await expect(settingsStorage.getSettings()).resolves.toEqual(DEFAULT_TIMER_SETTINGS)
+    await expect(
+      settingsStorage.saveSettings({ focusMinutes: 15, breakMinutes: 3 }),
+    ).resolves.toBeUndefined()
   })
 })

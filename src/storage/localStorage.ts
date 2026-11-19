@@ -7,7 +7,7 @@ const flowerValues = new Set<string>(FLOWER_TYPES)
 
 export type StorageProvider = () => globalThis.Storage | null
 
-function getBrowserStorage(): globalThis.Storage | null {
+export function getBrowserStorage(): globalThis.Storage | null {
   try {
     return typeof window === 'undefined' ? null : window.localStorage
   } catch {

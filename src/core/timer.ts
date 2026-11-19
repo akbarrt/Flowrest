@@ -4,7 +4,17 @@ export const BREAK_DURATION_MS = 5 * 60 * 1000
 export type TimerPhase = 'focus' | 'break'
 export type TimerStatus = 'idle' | 'running' | 'paused'
 
-export interface TimerState {
+export interface TimerDurations {
+  focusDurationMs: number
+  breakDurationMs: number
+}
+
+export const DEFAULT_DURATIONS: TimerDurations = {
+  focusDurationMs: FOCUS_DURATION_MS,
+  breakDurationMs: BREAK_DURATION_MS,
+}
+
+export interface TimerState extends TimerDurations {
   phase: TimerPhase
   status: TimerStatus
   /** Sisa waktu saat `segmentStartedAt` dicatat, atau sisa waktu saat ini ketika tidak berjalan. */
@@ -18,22 +28,26 @@ export interface TimerTick {
   phaseCompleted: TimerPhase | null
 }
 
-const PHASE_DURATION_MS: Record<TimerPhase, number> = {
-  focus: FOCUS_DURATION_MS,
-  break: BREAK_DURATION_MS,
+function durationFor(durations: TimerDurations, phase: TimerPhase): number {
+  return phase === 'focus' ? durations.focusDurationMs : durations.breakDurationMs
 }
 
-function createPhaseState(phase: TimerPhase): TimerState {
+function createPhaseState(phase: TimerPhase, durations: TimerDurations): TimerState {
   return {
     phase,
     status: 'idle',
-    remainingMs: PHASE_DURATION_MS[phase],
+    remainingMs: durationFor(durations, phase),
     segmentStartedAt: null,
+    focusDurationMs: durations.focusDurationMs,
+    breakDurationMs: durations.breakDurationMs,
   }
 }
 
-export function createTimerState(): TimerState {
-  return createPhaseState('focus')
+export function createTimerState(
+  phase: TimerPhase = 'focus',
+  durations: TimerDurations = DEFAULT_DURATIONS,
+): TimerState {
+  return createPhaseState(phase, durations)
 }
 
 export function startTimer(state: TimerState, now: number): TimerState {
@@ -69,8 +83,27 @@ export function resumeTimer(state: TimerState, now: number): TimerState {
   return startTimer(state, now)
 }
 
-export function resetTimer(): TimerState {
-  return createPhaseState('focus')
+export function resetTimer(
+  phase: TimerPhase = 'focus',
+  durations: TimerDurations = DEFAULT_DURATIONS,
+): TimerState {
+  return createPhaseState(phase, durations)
+}
+
+/**
+ * Memakai durasi baru hanya ketika timer idle. Fase yang sedang dipilih dipertahankan
+ * supaya pengguna tidak dikirim kembali ke fokus hanya karena mengubah pengaturan.
+ */
+export function withDurations(state: TimerState, durations: TimerDurations): TimerState {
+  if (
+    state.status !== 'idle' ||
+    (state.focusDurationMs === durations.focusDurationMs &&
+      state.breakDurationMs === durations.breakDurationMs)
+  ) {
+    return state
+  }
+
+  return createPhaseState(state.phase, durations)
 }
 
 export function remainingTime(state: TimerState, now: number): number {
@@ -94,7 +127,7 @@ export function tickTimer(state: TimerState, now: number): TimerTick {
   const nextPhase: TimerPhase = state.phase === 'focus' ? 'break' : 'focus'
 
   return {
-    state: createPhaseState(nextPhase),
+    state: createPhaseState(nextPhase, state),
     phaseCompleted: state.phase,
   }
 }

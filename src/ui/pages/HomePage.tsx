@@ -1,21 +1,26 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { createSession } from '../../core/session'
-import { FOCUS_DURATION_MS } from '../../core/timer'
+import { timerDurationsFromSettings } from '../../core/settings'
 import type { Mood } from '../../core/types'
 import { useSessions } from '../../hooks/useSessions'
+import { useSettings } from '../../hooks/useSettings'
+import { useTimer } from '../../hooks/useTimer'
+import { DurationSettings } from '../components/DurationSettings'
 import { MoodForm } from '../components/MoodForm'
 import { Timer } from '../components/Timer'
 
-const SESSION_MINUTES = FOCUS_DURATION_MS / (60 * 1000)
-
 export function HomePage({ isActive }: { isActive: boolean }) {
   const { addSession } = useSessions()
+  const { settings, isLoading, error, saveSettings } = useSettings()
+  const durations = useMemo(() => timerDurationsFromSettings(settings), [settings])
   const [isMoodFormOpen, setIsMoodFormOpen] = useState(false)
   const isSavingRef = useRef(false)
 
   const handleSessionComplete = useCallback(() => {
     setIsMoodFormOpen(true)
   }, [])
+
+  const timer = useTimer({ durations, onSessionComplete: handleSessionComplete })
 
   const saveSession = useCallback(
     async (mood: Mood) => {
@@ -30,7 +35,7 @@ export function HomePage({ isActive }: { isActive: boolean }) {
           createSession({
             id: crypto.randomUUID(),
             date: new Date().toISOString(),
-            durationMinutes: SESSION_MINUTES,
+            durationMinutes: settings.focusMinutes,
             mood,
           }),
         )
@@ -39,7 +44,7 @@ export function HomePage({ isActive }: { isActive: boolean }) {
         isSavingRef.current = false
       }
     },
-    [addSession],
+    [addSession, settings.focusMinutes],
   )
 
   const handleSkip = useCallback(() => saveSession('neutral'), [saveSession])
@@ -58,16 +63,21 @@ export function HomePage({ isActive }: { isActive: boolean }) {
           Timer fokus
         </h1>
         <p className="text-base leading-relaxed text-muted">
-          Sesi fokus 25 menit, lalu jeda 5 menit.
+          Sesi fokus {settings.focusMinutes} menit, lalu jeda {settings.breakMinutes} menit.
         </p>
       </div>
       <div className={isMoodFormOpen ? 'hidden' : 'w-full'}>
-        <Timer
-          onSessionComplete={handleSessionComplete}
-          active={isActive && !isMoodFormOpen}
-        />
+        <Timer timer={timer} active={isActive && !isMoodFormOpen} />
       </div>
       {isMoodFormOpen ? <MoodForm onSave={saveSession} onSkip={handleSkip} /> : null}
+      <DurationSettings
+        key={`${settings.focusMinutes}-${settings.breakMinutes}`}
+        settings={settings}
+        disabled={timer.status !== 'idle'}
+        isLoading={isLoading}
+        error={error}
+        onSave={saveSettings}
+      />
     </section>
   )
 }

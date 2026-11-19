@@ -9,6 +9,7 @@ import {
   resumeTimer,
   startTimer,
   tickTimer,
+  withDurations,
 } from '../timer'
 
 const MINUTE = 60 * 1000
@@ -143,5 +144,65 @@ describe('tickTimer', () => {
 
     expect(result.phaseCompleted).toBeNull()
     expect(result.state).toBe(idle)
+  })
+})
+
+describe('custom durations', () => {
+  const durations = { focusDurationMs: 10 * MINUTE, breakDurationMs: 2 * MINUTE }
+
+  test('createTimerState uses the supplied durations', () => {
+    const state = createTimerState('focus', durations)
+
+    expect(state.remainingMs).toBe(10 * MINUTE)
+    expect(state.focusDurationMs).toBe(10 * MINUTE)
+    expect(state.breakDurationMs).toBe(2 * MINUTE)
+  })
+
+  test('tickTimer uses the stored break duration when focus completes', () => {
+    const running = startTimer(createTimerState('focus', durations), 0)
+    const result = tickTimer(running, 10 * MINUTE)
+
+    expect(result.phaseCompleted).toBe('focus')
+    expect(result.state.remainingMs).toBe(2 * MINUTE)
+    expect(result.state.breakDurationMs).toBe(2 * MINUTE)
+  })
+
+  test('tickTimer uses the stored focus duration when break completes', () => {
+    const running = startTimer(createTimerState('focus', durations), 0)
+    const onBreak = tickTimer(running, 10 * MINUTE).state
+    const breakRunning = startTimer(onBreak, 1000)
+    const result = tickTimer(breakRunning, 1000 + 2 * MINUTE)
+
+    expect(result.phaseCompleted).toBe('break')
+    expect(result.state.remainingMs).toBe(10 * MINUTE)
+  })
+
+  test('resetTimer uses supplied durations and returns to idle focus', () => {
+    const reset = resetTimer('focus', durations)
+
+    expect(reset.phase).toBe('focus')
+    expect(reset.status).toBe('idle')
+    expect(reset.remainingMs).toBe(10 * MINUTE)
+  })
+
+  test('withDurations keeps the current phase while idle', () => {
+    const idleBreak = createTimerState('break')
+    const next = withDurations(idleBreak, durations)
+
+    expect(next.phase).toBe('break')
+    expect(next.status).toBe('idle')
+    expect(next.remainingMs).toBe(2 * MINUTE)
+  })
+
+  test('withDurations ignores changes while running', () => {
+    const running = startTimer(createTimerState('focus'), 0)
+
+    expect(withDurations(running, durations)).toBe(running)
+  })
+
+  test('withDurations returns the same state when nothing changes', () => {
+    const state = createTimerState('focus', durations)
+
+    expect(withDurations(state, durations)).toBe(state)
   })
 })

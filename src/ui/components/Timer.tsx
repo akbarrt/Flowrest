@@ -1,12 +1,11 @@
 import { useCallback, useEffect } from 'react'
-import { BREAK_DURATION_MS, FOCUS_DURATION_MS } from '../../core/timer'
-import { useTimer } from '../../hooks/useTimer'
+import type { UseTimerResult } from '../../hooks/useTimer'
 
 const RING_RADIUS = 54
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
 type TimerProps = {
-  onSessionComplete?: () => void
+  timer: UseTimerResult
   active?: boolean
 }
 
@@ -35,8 +34,8 @@ function isTextEntryTarget(target: EventTarget | null): boolean {
   )
 }
 
-export function Timer({ onSessionComplete, active = true }: TimerProps) {
-  const { phase, status, remainingMs, start, pause, reset } = useTimer({ onSessionComplete })
+export function Timer({ timer, active = true }: TimerProps) {
+  const { phase, status, remainingMs, durations, start, pause, reset } = timer
 
   const handleToggle = useCallback(() => {
     if (status === 'running') {
@@ -78,7 +77,7 @@ export function Timer({ onSessionComplete, active = true }: TimerProps) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [active, handleToggle, reset])
 
-  const totalMs = phase === 'focus' ? FOCUS_DURATION_MS : BREAK_DURATION_MS
+  const totalMs = phase === 'focus' ? durations.focusDurationMs : durations.breakDurationMs
   const remainingFraction = Math.min(1, Math.max(0, remainingMs / totalMs))
   const dashOffset = RING_CIRCUMFERENCE * (1 - remainingFraction)
   const ringColor = phase === 'focus' ? 'var(--color-moss)' : 'var(--color-sage)'
@@ -93,7 +92,8 @@ export function Timer({ onSessionComplete, active = true }: TimerProps) {
         : phase === 'break'
           ? 'Siap untuk jeda'
           : 'Siap dimulai'
-  const resetDisabled = phase === 'focus' && status === 'idle' && remainingMs === FOCUS_DURATION_MS
+  const resetDisabled =
+    phase === 'focus' && status === 'idle' && remainingMs === durations.focusDurationMs
 
   return (
     <div className="flex w-full flex-col items-center gap-6">
