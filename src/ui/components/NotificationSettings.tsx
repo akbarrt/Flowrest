@@ -5,6 +5,18 @@ type NotificationSettingsProps = {
   onRequest: () => Promise<void>
 }
 
+function statusText(permission: NotificationPermissionState): string {
+  if (permission === 'granted') {
+    return 'Toast Windows aktif. Jika senyap, cek Focus Assist.'
+  }
+
+  if (permission === 'denied') {
+    return 'Diblokir. Ubah izin di Chrome dan Windows.'
+  }
+
+  return 'Aktifkan untuk toast Windows saat sesi selesai.'
+}
+
 export function NotificationSettings({ permission, onRequest }: NotificationSettingsProps) {
   if (permission === 'unsupported') {
     return null
@@ -13,30 +25,26 @@ export function NotificationSettings({ permission, onRequest }: NotificationSett
   return (
     <section
       aria-labelledby="notification-title"
-      className="w-full rounded-xl border border-line bg-surface p-4 text-left sm:p-5"
+      className="w-full border-t border-line pt-3 text-left"
     >
-      <h2 id="notification-title" className="font-display text-lg font-semibold text-ink">
-        Notifikasi
-      </h2>
+      <div className="flex min-h-11 items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 id="notification-title" className="font-display text-base font-semibold text-ink">
+            Notifikasi
+          </h2>
+          <p className="text-xs leading-tight text-muted">{statusText(permission)}</p>
+        </div>
 
-      {permission === 'granted' ? (
-        <p className="mt-1 text-sm text-muted">Notifikasi aktif saat sesi selesai.</p>
-      ) : permission === 'denied' ? (
-        <p className="mt-1 text-sm text-muted">Notifikasi diblokir di pengaturan browser.</p>
-      ) : (
-        <>
-          <p className="mt-1 text-sm text-muted">
-            Minta notifikasi saat fokus dan istirahat selesai.
-          </p>
+        {permission === 'default' ? (
           <button
             type="button"
             onClick={() => void onRequest()}
-            className="mt-3 min-h-11 rounded-md border border-line bg-paper px-4 text-sm font-medium text-ink transition-colors hover:bg-line/40 active:bg-line/60 motion-reduce:transition-none"
+            className="min-h-11 shrink-0 rounded-md border border-line bg-paper px-3 text-xs font-medium text-ink transition-colors hover:bg-line/40 active:bg-line/60 motion-reduce:transition-none"
           >
             Aktifkan notifikasi
           </button>
-        </>
-      )}
+        ) : null}
+      </div>
     </section>
   )
 }

@@ -45,21 +45,18 @@ export function MoodForm({ onSave, onSkip }: MoodFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full max-w-md border-t border-line pt-6 text-left"
-    >
-      <h2 className="font-display text-xl font-semibold text-ink">Bagaimana suasana hatimu?</h2>
-      <p className="mt-1 text-sm leading-relaxed text-muted">
+    <form onSubmit={handleSubmit} className="w-full max-w-md border-t border-line pt-3 text-left">
+      <h2 className="font-display text-base font-semibold text-ink">Bagaimana suasana hatimu?</h2>
+      <p className="mt-0.5 text-xs text-muted">
         Pilih satu mood untuk sesi fokus tadi, atau lewati.
       </p>
-      <fieldset className="mt-4" disabled={isSaving}>
+      <fieldset className="mt-2" disabled={isSaving}>
         <legend className="sr-only">Mood sesi</legend>
-        <div className="divide-y divide-line border-y border-line">
+        <div className="grid grid-cols-2 gap-x-2 gap-y-1">
           {MOODS.map((mood) => (
             <label
               key={mood}
-              className="flex min-h-11 cursor-pointer items-center gap-3 px-1 py-2 text-base text-ink"
+              className="flex min-h-11 cursor-pointer items-center gap-2 px-1 text-sm text-ink"
             >
               <input
                 type="radio"
@@ -68,18 +65,18 @@ export function MoodForm({ onSave, onSkip }: MoodFormProps) {
                 checked={selectedMood === mood}
                 onChange={() => setSelectedMood(mood)}
                 required
-                className="h-4 w-4 accent-moss"
+                className="h-4 w-4 shrink-0 accent-moss"
               />
               <span>{MOOD_LABELS[mood]}</span>
             </label>
           ))}
         </div>
       </fieldset>
-      <div className="mt-6 flex flex-wrap gap-3">
+      <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="submit"
           disabled={isSaving}
-          className="min-h-11 rounded-md bg-moss px-6 text-base font-medium text-white transition-colors hover:bg-moss/90 active:bg-moss/80 disabled:opacity-[0.45] motion-reduce:transition-none"
+          className="min-h-11 rounded-md bg-moss px-4 text-sm font-medium text-white transition-colors hover:bg-moss/90 active:bg-moss/80 disabled:opacity-[0.45] motion-reduce:transition-none"
         >
           Simpan mood
         </button>
@@ -87,7 +84,7 @@ export function MoodForm({ onSave, onSkip }: MoodFormProps) {
           type="button"
           onClick={handleSkip}
           disabled={isSaving}
-          className="min-h-11 rounded-md border border-line bg-surface px-6 text-base font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 disabled:opacity-[0.45] motion-reduce:transition-none"
+          className="min-h-11 rounded-md border border-line bg-surface px-4 text-sm font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 disabled:opacity-[0.45] motion-reduce:transition-none"
         >
           Lewati
         </button>

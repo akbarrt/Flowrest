@@ -36,6 +36,7 @@ export function useNotifications(): UseNotificationsResult {
     new Notification(title, {
       body,
       tag: 'flowrest-phase-complete',
+      requireInteraction: true,
     })
   }, [])
 

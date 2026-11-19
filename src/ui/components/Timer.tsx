@@ -99,8 +99,8 @@ export function Timer({ timer, active = true }: TimerProps) {
   const showSkipBreak = phase === 'break'
 
   return (
-    <div className="flex w-full flex-col items-center gap-6">
-      <div className="relative aspect-square w-full max-w-[18rem]">
+    <div className="flex w-full flex-col items-center gap-4">
+      <div className="relative aspect-square w-full max-w-[13rem] sm:max-w-[15rem]">
         <svg viewBox="0 0 120 120" aria-hidden="true" className="h-full w-full -rotate-90">
           <circle
             cx="60"
@@ -128,18 +128,18 @@ export function Timer({ timer, active = true }: TimerProps) {
             role="timer"
             aria-live="polite"
             aria-atomic="true"
-            className="font-display text-5xl font-semibold tabular-nums tracking-tight text-ink sm:text-6xl"
+            className="font-display text-4xl font-semibold tabular-nums tracking-tight text-ink sm:text-5xl"
           >
             {formatTime(remainingMs)}
           </p>
           <p className="text-sm text-muted">{statusLabel}</p>
         </div>
       </div>
-      <div className="flex w-full flex-wrap items-center justify-center gap-3">
+      <div className="flex w-full flex-wrap items-center justify-center gap-2">
         <button
           type="button"
           onClick={handleToggle}
-          className="min-h-11 min-w-32 rounded-md bg-moss px-6 text-base font-medium text-white transition-colors hover:bg-moss/90 active:bg-moss/80 motion-reduce:transition-none"
+          className="min-h-11 min-w-20 rounded-md bg-moss px-3 text-sm font-medium text-white transition-colors hover:bg-moss/90 active:bg-moss/80 motion-reduce:transition-none"
         >
           {primaryLabel}
         </button>
@@ -147,7 +147,7 @@ export function Timer({ timer, active = true }: TimerProps) {
           type="button"
           onClick={reset}
           disabled={resetDisabled}
-          className="min-h-11 min-w-32 rounded-md border border-line bg-surface px-6 text-base font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 disabled:opacity-[0.45] motion-reduce:transition-none"
+          className="min-h-11 min-w-20 rounded-md border border-line bg-surface px-3 text-sm font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 disabled:opacity-[0.45] motion-reduce:transition-none"
         >
           Reset
         </button>
@@ -155,7 +155,7 @@ export function Timer({ timer, active = true }: TimerProps) {
           <button
             type="button"
             onClick={finishEarly}
-            className="min-h-11 rounded-md border border-line bg-surface px-4 text-sm font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 motion-reduce:transition-none"
+            className="min-h-11 rounded-md border border-line bg-surface px-3 text-xs font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 motion-reduce:transition-none"
           >
             Selesai lebih awal
           </button>
@@ -164,13 +164,15 @@ export function Timer({ timer, active = true }: TimerProps) {
           <button
             type="button"
             onClick={skipBreak}
-            className="min-h-11 rounded-md border border-line bg-surface px-4 text-sm font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 motion-reduce:transition-none"
+            className="min-h-11 rounded-md border border-line bg-surface px-3 text-xs font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 motion-reduce:transition-none"
           >
             Lewati istirahat
           </button>
         ) : null}
       </div>
-      <p className="text-xs text-muted">Tekan Space untuk mulai atau jeda, R untuk reset.</p>
+      <p className="hidden text-xs text-muted sm:block">
+        Tekan Space untuk mulai atau jeda, R untuk reset.
+      </p>
     </div>
   )
 }

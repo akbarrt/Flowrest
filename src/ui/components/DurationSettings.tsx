@@ -79,37 +79,30 @@ export function DurationSettings({
   }
 
   return (
-    <section
-      aria-labelledby="duration-title"
-      className="w-full rounded-xl border border-line bg-surface p-4 text-left sm:p-5"
-    >
-      <div className="flex flex-col gap-1">
-        <h2 id="duration-title" className="font-display text-lg font-semibold text-ink">
+    <section aria-labelledby="duration-title" className="w-full border-t border-line pt-3 text-left">
+      <div className="flex min-h-11 flex-wrap items-center justify-between gap-2">
+        <h2 id="duration-title" className="font-display text-base font-semibold text-ink">
           Durasi sesi
         </h2>
-        <p className="text-sm leading-relaxed text-muted">
-          Pilih preset atau isi sendiri. Berlaku untuk sesi berikutnya.
-        </p>
+        <div className="flex flex-wrap gap-1" role="group" aria-label="Preset durasi">
+          {PRESETS.map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              disabled={locked}
+              aria-pressed={activePreset?.label === preset.label}
+              onClick={() => void commit(preset.settings)}
+              className="min-h-11 rounded-md border border-line bg-paper px-2.5 text-xs font-medium text-ink transition-colors hover:bg-line/40 active:bg-line/60 aria-pressed:border-moss aria-pressed:bg-moss aria-pressed:text-white disabled:opacity-[0.45] motion-reduce:transition-none"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Preset durasi">
-        {PRESETS.map((preset) => (
-          <button
-            key={preset.label}
-            type="button"
-            disabled={locked}
-            aria-pressed={activePreset?.label === preset.label}
-            onClick={() => void commit(preset.settings)}
-            className="min-h-11 rounded-md border border-line bg-paper px-3 text-sm font-medium text-ink transition-colors hover:bg-line/40 active:bg-line/60 aria-pressed:border-moss aria-pressed:bg-moss aria-pressed:text-white disabled:opacity-[0.45] motion-reduce:transition-none"
-          >
-            {preset.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="focus-minutes" className="text-sm font-medium text-ink">
+      <div className="mt-2 grid grid-cols-[1fr_1fr_auto] items-end gap-2">
+        <div className="flex min-w-0 flex-col gap-1">
+          <label htmlFor="focus-minutes" className="text-xs font-medium text-ink">
             Fokus (menit)
           </label>
           <input
@@ -127,12 +120,12 @@ export function DurationSettings({
               setFocusMinutes(event.target.value)
               setLocalError(null)
             }}
-            className="min-h-11 w-full rounded-md border border-line bg-paper px-3 text-base text-ink"
+            className="min-h-11 w-full rounded-md border border-line bg-paper px-2 text-sm text-ink"
           />
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="break-minutes" className="text-sm font-medium text-ink">
+        <div className="flex min-w-0 flex-col gap-1">
+          <label htmlFor="break-minutes" className="text-xs font-medium text-ink">
             Istirahat (menit)
           </label>
           <input
@@ -150,33 +143,32 @@ export function DurationSettings({
               setBreakMinutes(event.target.value)
               setLocalError(null)
             }}
-            className="min-h-11 w-full rounded-md border border-line bg-paper px-3 text-base text-ink"
+            className="min-h-11 w-full rounded-md border border-line bg-paper px-2 text-sm text-ink"
           />
         </div>
-      </div>
 
-      {localError !== null ? (
-        <p id="duration-error" role="alert" className="mt-3 text-sm text-danger">
-          {localError}
-        </p>
-      ) : null}
-
-      <div className="mt-4 flex flex-wrap items-center gap-3">
         <button
           type="button"
           disabled={locked || !isDirty}
           onClick={() => void handleManualSave()}
-          className="min-h-11 rounded-md bg-moss px-5 text-sm font-medium text-white transition-colors hover:bg-moss/90 active:bg-moss/80 disabled:opacity-[0.45] motion-reduce:transition-none"
+          className="min-h-11 rounded-md bg-moss px-2 text-xs font-medium text-white transition-colors hover:bg-moss/90 active:bg-moss/80 disabled:opacity-[0.45] motion-reduce:transition-none"
         >
           Simpan durasi
         </button>
-        {disabled ? (
-          <p className="text-xs text-muted">Durasi bisa diubah saat timer tidak berjalan.</p>
-        ) : null}
       </div>
 
+      {disabled ? (
+        <p className="mt-1 text-xs text-muted">Durasi bisa diubah saat timer tidak berjalan.</p>
+      ) : null}
+
+      {localError !== null ? (
+        <p id="duration-error" role="alert" className="mt-1 text-xs text-danger">
+          {localError}
+        </p>
+      ) : null}
+
       {error !== null ? (
-        <p role="alert" className="mt-3 text-sm text-danger">
+        <p role="alert" className="mt-1 text-xs text-danger">
           {error}
         </p>
       ) : null}

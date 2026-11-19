@@ -23,7 +23,7 @@ export function Layout({ children, currentPage }: LayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-paper text-ink">
       <header className="border-b border-line">
-        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-4">
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6 sm:py-3">
           <a
             href="#timer"
             className="inline-flex min-h-11 items-center font-display text-xl font-semibold tracking-tight text-moss"
@@ -48,7 +48,7 @@ export function Layout({ children, currentPage }: LayoutProps) {
           </nav>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-3 sm:px-6 sm:py-6">
         {children}
       </main>
     </div>
