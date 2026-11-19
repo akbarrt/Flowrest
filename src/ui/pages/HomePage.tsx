@@ -8,7 +8,7 @@ import { Timer } from '../components/Timer'
 
 const SESSION_MINUTES = FOCUS_DURATION_MS / (60 * 1000)
 
-export function HomePage() {
+export function HomePage({ isActive }: { isActive: boolean }) {
   const { addSession } = useSessions()
   const [isMoodFormOpen, setIsMoodFormOpen] = useState(false)
   const isSavingRef = useRef(false)
@@ -62,7 +62,10 @@ export function HomePage() {
         </p>
       </div>
       <div className={isMoodFormOpen ? 'hidden' : 'w-full'}>
-        <Timer onSessionComplete={handleSessionComplete} />
+        <Timer
+          onSessionComplete={handleSessionComplete}
+          active={isActive && !isMoodFormOpen}
+        />
       </div>
       {isMoodFormOpen ? <MoodForm onSave={saveSession} onSkip={handleSkip} /> : null}
     </section>

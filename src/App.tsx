@@ -31,7 +31,10 @@ export function App() {
 
   return (
     <Layout currentPage={page}>
-      {page === 'garden' ? <GardenPage /> : <HomePage />}
+      <div className={page === 'garden' ? 'hidden' : undefined}>
+        <HomePage isActive={page === 'timer'} />
+      </div>
+      {page === 'garden' ? <GardenPage /> : null}
     </Layout>
   )
 }

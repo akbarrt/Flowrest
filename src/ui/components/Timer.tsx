@@ -7,6 +7,7 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
 type TimerProps = {
   onSessionComplete?: () => void
+  active?: boolean
 }
 
 function formatTime(remainingMs: number): string {
@@ -34,7 +35,7 @@ function isTextEntryTarget(target: EventTarget | null): boolean {
   )
 }
 
-export function Timer({ onSessionComplete }: TimerProps) {
+export function Timer({ onSessionComplete, active = true }: TimerProps) {
   const { phase, status, remainingMs, start, pause, reset } = useTimer({ onSessionComplete })
 
   const handleToggle = useCallback(() => {
@@ -47,6 +48,10 @@ export function Timer({ onSessionComplete }: TimerProps) {
   }, [pause, start, status])
 
   useEffect(() => {
+    if (!active) {
+      return
+    }
+
     function handleKeyDown(event: KeyboardEvent) {
       if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) {
         return
@@ -71,7 +76,7 @@ export function Timer({ onSessionComplete }: TimerProps) {
     window.addEventListener('keydown', handleKeyDown)
 
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleToggle, reset])
+  }, [active, handleToggle, reset])
 
   const totalMs = phase === 'focus' ? FOCUS_DURATION_MS : BREAK_DURATION_MS
   const remainingFraction = Math.min(1, Math.max(0, remainingMs / totalMs))
