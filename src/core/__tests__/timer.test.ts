@@ -3,10 +3,12 @@ import {
   BREAK_DURATION_MS,
   FOCUS_DURATION_MS,
   createTimerState,
+  finishEarly,
   pauseTimer,
   remainingTime,
   resetTimer,
   resumeTimer,
+  skipBreak,
   startTimer,
   tickTimer,
   withDurations,
@@ -204,5 +206,74 @@ describe('custom durations', () => {
     const state = createTimerState('focus', durations)
 
     expect(withDurations(state, durations)).toBe(state)
+  })
+})
+
+describe('finishEarly', () => {
+  test('ends a running focus into an idle break without completing a phase', () => {
+    const running = startTimer(createTimerState('focus'), 0)
+    const next = finishEarly(running)
+
+    expect(next.phase).toBe('break')
+    expect(next.status).toBe('idle')
+    expect(next.remainingMs).toBe(BREAK_DURATION_MS)
+    expect(next.segmentStartedAt).toBeNull()
+  })
+
+  test('also works from a paused focus', () => {
+    const running = startTimer(createTimerState('focus'), 0)
+    const paused = pauseTimer(running, MINUTE)
+    const next = finishEarly(paused)
+
+    expect(next.phase).toBe('break')
+    expect(next.status).toBe('idle')
+    expect(next.remainingMs).toBe(BREAK_DURATION_MS)
+  })
+
+  test('does nothing for idle focus or any break state', () => {
+    const idleFocus = createTimerState('focus')
+    const idleBreak = createTimerState('break')
+    const runningBreak = startTimer(idleBreak, 0)
+
+    expect(finishEarly(idleFocus)).toBe(idleFocus)
+    expect(finishEarly(idleBreak)).toBe(idleBreak)
+    expect(finishEarly(runningBreak)).toBe(runningBreak)
+  })
+})
+
+describe('skipBreak', () => {
+  test('returns from an idle break to an idle focus', () => {
+    const idleBreak = createTimerState('break')
+    const next = skipBreak(idleBreak)
+
+    expect(next.phase).toBe('focus')
+    expect(next.status).toBe('idle')
+    expect(next.remainingMs).toBe(FOCUS_DURATION_MS)
+    expect(next.segmentStartedAt).toBeNull()
+  })
+
+  test('also works from a running break', () => {
+    const runningBreak = startTimer(createTimerState('break'), 0)
+    const next = skipBreak(runningBreak)
+
+    expect(next.phase).toBe('focus')
+    expect(next.status).toBe('idle')
+    expect(next.remainingMs).toBe(FOCUS_DURATION_MS)
+  })
+
+  test('keeps the stored custom focus duration', () => {
+    const durations = { focusDurationMs: 10 * MINUTE, breakDurationMs: 2 * MINUTE }
+    const next = skipBreak(createTimerState('break', durations))
+
+    expect(next.remainingMs).toBe(10 * MINUTE)
+    expect(next.focusDurationMs).toBe(10 * MINUTE)
+  })
+
+  test('does nothing for any focus state', () => {
+    const idleFocus = createTimerState('focus')
+    const runningFocus = startTimer(idleFocus, 0)
+
+    expect(skipBreak(idleFocus)).toBe(idleFocus)
+    expect(skipBreak(runningFocus)).toBe(runningFocus)
   })
 })

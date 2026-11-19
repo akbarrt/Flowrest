@@ -35,7 +35,8 @@ function isTextEntryTarget(target: EventTarget | null): boolean {
 }
 
 export function Timer({ timer, active = true }: TimerProps) {
-  const { phase, status, remainingMs, durations, start, pause, reset } = timer
+  const { phase, status, remainingMs, durations, start, pause, reset, finishEarly, skipBreak } =
+    timer
 
   const handleToggle = useCallback(() => {
     if (status === 'running') {
@@ -94,6 +95,8 @@ export function Timer({ timer, active = true }: TimerProps) {
           : 'Siap dimulai'
   const resetDisabled =
     phase === 'focus' && status === 'idle' && remainingMs === durations.focusDurationMs
+  const showFinishEarly = phase === 'focus' && status !== 'idle'
+  const showSkipBreak = phase === 'break'
 
   return (
     <div className="flex w-full flex-col items-center gap-6">
@@ -148,6 +151,24 @@ export function Timer({ timer, active = true }: TimerProps) {
         >
           Reset
         </button>
+        {showFinishEarly ? (
+          <button
+            type="button"
+            onClick={finishEarly}
+            className="min-h-11 rounded-md border border-line bg-surface px-4 text-sm font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 motion-reduce:transition-none"
+          >
+            Selesai lebih awal
+          </button>
+        ) : null}
+        {showSkipBreak ? (
+          <button
+            type="button"
+            onClick={skipBreak}
+            className="min-h-11 rounded-md border border-line bg-surface px-4 text-sm font-medium text-ink transition-colors hover:bg-paper active:bg-line/40 motion-reduce:transition-none"
+          >
+            Lewati jeda
+          </button>
+        ) : null}
       </div>
       <p className="text-xs text-muted">Tekan Space untuk mulai atau jeda, R untuk reset.</p>
     </div>

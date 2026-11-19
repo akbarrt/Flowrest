@@ -106,6 +106,27 @@ export function withDurations(state: TimerState, durations: TimerDurations): Tim
   return createPhaseState(state.phase, durations)
 }
 
+/**
+ * Mengakhiri fokus yang sedang berjalan atau dijeda tanpa menandai sesi selesai.
+ * Tidak ada `phaseCompleted`, jadi tidak memicu form mood atau penyimpanan sesi.
+ */
+export function finishEarly(state: TimerState): TimerState {
+  if (state.phase !== 'focus' || state.status === 'idle') {
+    return state
+  }
+
+  return createPhaseState('break', state)
+}
+
+/** Meninggalkan jeda dan kembali ke fokus idle dengan mulai manual. */
+export function skipBreak(state: TimerState): TimerState {
+  if (state.phase !== 'break') {
+    return state
+  }
+
+  return createPhaseState('focus', state)
+}
+
 export function remainingTime(state: TimerState, now: number): number {
   if (state.status !== 'running' || state.segmentStartedAt === null) {
     return state.remainingMs

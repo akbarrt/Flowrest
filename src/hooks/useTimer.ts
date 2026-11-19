@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   DEFAULT_DURATIONS,
   createTimerState,
+  finishEarly as finishEarlyTimer,
   pauseTimer,
   remainingTime,
   resetTimer,
+  skipBreak as skipBreakTimer,
   startTimer,
   tickTimer,
   withDurations,
@@ -28,6 +30,8 @@ export interface UseTimerResult {
   start: () => void
   pause: () => void
   reset: () => void
+  finishEarly: () => void
+  skipBreak: () => void
 }
 
 interface TimerView {
@@ -121,6 +125,26 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
     setView(toView(next, now))
   }, [])
 
+  const finishEarly = useCallback(() => {
+    const next = finishEarlyTimer(stateRef.current)
+    if (next === stateRef.current) {
+      return
+    }
+
+    stateRef.current = next
+    setView(toView(next, Date.now()))
+  }, [])
+
+  const skipBreak = useCallback(() => {
+    const next = skipBreakTimer(stateRef.current)
+    if (next === stateRef.current) {
+      return
+    }
+
+    stateRef.current = next
+    setView(toView(next, Date.now()))
+  }, [])
+
   return {
     phase: view.phase,
     status: view.status,
@@ -129,5 +153,7 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
     start,
     pause,
     reset,
+    finishEarly,
+    skipBreak,
   }
 }
